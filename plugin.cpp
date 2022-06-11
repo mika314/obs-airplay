@@ -1,46 +1,52 @@
+#include "airplay.hpp"
+#include <log/log.hpp>
+
 extern "C" {
 #include <obs/obs-module.h>
 
 OBS_DECLARE_MODULE()
 
-OBS_MODULE_USE_DEFAULT_LOCALE("airplay", "en-US")
+OBS_MODULE_USE_DEFAULT_LOCALE("AirPlay", "en-US")
 
-static auto sourceName(void *) -> const char *
+static auto sourceName(void *v) -> const char *
 {
-  return "airplay";
+  return static_cast<AirPlay *>(v)->name();
 }
 
-static auto sourceCreate(obs_data *, obs_source *) -> void *
+static auto sourceCreate(obs_data *data, obs_source *obsSource) -> void *
 {
-  return nullptr;
+  return new AirPlay(data, obsSource);
 }
 
-static auto sourceDestroy(void *) -> void {}
-
-static auto sourceUpdate(void *, obs_data_t *) -> void {}
-
-static auto sourceRender(void *, gs_effect_t *) -> void {}
-
-static auto sourceWidth(void *) -> uint32_t
+static auto sourceDestroy(void *v) -> void
 {
-  return 0;
+  delete static_cast<AirPlay *>(v);
 }
 
-static auto sourceHeight(void *) -> uint32_t
+static auto sourceUpdate(void *v, obs_data_t *data) -> void
 {
-  return 0;
+  LOG(__func__, v, data);
 }
 
-static struct obs_source_info source = {.id = "airplay",
+static auto sourceWidth(void *v) -> uint32_t
+{
+  return static_cast<AirPlay *>(v)->width();
+}
+
+static auto sourceHeight(void *v) -> uint32_t
+{
+  return static_cast<AirPlay *>(v)->height();
+}
+
+static struct obs_source_info source = {.id = "AirPlay",
                                         .type = OBS_SOURCE_TYPE_INPUT,
-                                        .output_flags = OBS_SOURCE_VIDEO,
+                                        .output_flags = OBS_SOURCE_ASYNC_VIDEO,
                                         .get_name = sourceName,
                                         .create = sourceCreate,
                                         .destroy = sourceDestroy,
                                         .get_width = sourceWidth,
                                         .get_height = sourceHeight,
-                                        .update = sourceUpdate,
-                                        .video_render = sourceRender};
+                                        .update = sourceUpdate};
 
 bool obs_module_load(void)
 {
