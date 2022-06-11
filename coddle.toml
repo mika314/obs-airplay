@@ -1,1 +1,2 @@
 shared=true
+ldflags="-ldns_sd -lplist"

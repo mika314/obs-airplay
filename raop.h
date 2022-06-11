@@ -27,8 +27,6 @@ extern "C" {
 #define RAOP_LOG_DEBUG       7       /* debug-level messages */
 
 
-typedef struct raop_s raop_t;
-
 typedef void (*raop_log_callback_t)(void *cls, int level, const char *msg);
 
 struct raop_callbacks_s {
@@ -55,20 +53,20 @@ struct raop_callbacks_s {
 typedef struct raop_callbacks_s raop_callbacks_t;
 raop_ntp_t *raop_ntp_init(logger_t *logger, raop_callbacks_t *callbacks, const unsigned char *remote_addr, int remote_addr_len, unsigned short timing_rport);
   
-RAOP_API raop_t *raop_init(int max_clients, raop_callbacks_t *callbacks);
-RAOP_API void raop_set_log_level(raop_t *raop, int level);
-RAOP_API void raop_set_log_callback(raop_t *raop, raop_log_callback_t callback, void *cls);
-RAOP_API int raop_set_plist(raop_t *raop, const char *plist_item, const int value);
-RAOP_API void raop_set_port(raop_t *raop, unsigned short port);
-RAOP_API void raop_set_udp_ports(raop_t *raop, unsigned short port[3]);
-RAOP_API void raop_set_tcp_ports(raop_t *raop, unsigned short port[2]);
-RAOP_API unsigned short raop_get_port(raop_t *raop);
-RAOP_API void *raop_get_callback_cls(raop_t *raop);
-RAOP_API int raop_start(raop_t *raop, unsigned short *port);
-RAOP_API int raop_is_running(raop_t *raop);
-RAOP_API void raop_stop(raop_t *raop);
-RAOP_API void raop_set_dnssd(raop_t *raop, dnssd_t *dnssd);
-RAOP_API void raop_destroy(raop_t *raop);
+RAOP_API struct raop_t *raop_init(int max_clients, raop_callbacks_t *callbacks);
+RAOP_API void raop_set_log_level(struct raop_t *raop, int level);
+RAOP_API void raop_set_log_callback(struct raop_t *raop, raop_log_callback_t callback, void *cls);
+RAOP_API int raop_set_plist(struct raop_t *raop, const char *plist_item, const int value);
+RAOP_API void raop_set_port(struct raop_t *raop, unsigned short port);
+RAOP_API void raop_set_udp_ports(struct raop_t *raop, unsigned short port[3]);
+RAOP_API void raop_set_tcp_ports(struct raop_t *raop, unsigned short port[2]);
+RAOP_API unsigned short raop_get_port(struct raop_t *raop);
+RAOP_API void *raop_get_callback_cls(struct raop_t *raop);
+RAOP_API int raop_start(struct raop_t *raop, unsigned short *port);
+RAOP_API int raop_is_running(struct raop_t *raop);
+RAOP_API void raop_stop(struct raop_t *raop);
+RAOP_API void raop_set_dnssd(struct raop_t *raop, dnssd_t *dnssd);
+RAOP_API void raop_destroy(struct raop_t *raop);
 
 #ifdef __cplusplus
 }

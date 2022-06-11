@@ -18,19 +18,21 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-typedef struct {
-    int nal_count;
-    unsigned char *data;
-    int data_len;
-    uint64_t pts;
+typedef struct h264_decode_s
+{
+  int nal_count;
+  unsigned char *data;
+  int data_len;
+  uint64_t pts;
 } h264_decode_struct;
 
-typedef struct {
-    unsigned char *data;
-    int data_len;
-    uint64_t ntp_time;
-    uint64_t rtp_time;
-    bool have_synced;
+typedef struct audio_decode_s
+{
+  unsigned char *data;
+  int data_len;
+  uint64_t ntp_time;
+  uint64_t rtp_time;
+  bool have_synced;
 } audio_decode_struct;
 
 #endif //AIRPLAYSERVER_STREAM_H

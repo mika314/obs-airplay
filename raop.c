@@ -30,7 +30,7 @@
 #include "raop_rtp_mirror.h"
 #include "raop_ntp.h"
 
-struct raop_s {
+struct raop_t {
     /* Callbacks for audio and video */
     raop_callbacks_t callbacks;
 
@@ -64,7 +64,7 @@ struct raop_s {
 };
 
 struct raop_conn_s {
-    raop_t *raop;
+    struct raop_t *raop;
     raop_ntp_t *raop_ntp;
     raop_rtp_t *raop_rtp;
     raop_rtp_mirror_t *raop_rtp_mirror;
@@ -84,7 +84,7 @@ typedef struct raop_conn_s raop_conn_t;
 
 static void *
 conn_init(void *opaque, unsigned char *local, int locallen, unsigned char *remote, int remotelen) {
-    raop_t *raop = opaque;
+    struct raop_t *raop = opaque;
     raop_conn_t *conn;
 
     assert(raop);
@@ -388,9 +388,9 @@ conn_destroy(void *ptr) {
     free(conn);
 }
 
-raop_t *
+struct raop_t *
 raop_init(int max_clients, raop_callbacks_t *callbacks) {
-    raop_t *raop;
+    struct raop_t *raop;
     pairing_t *pairing;
     httpd_t *httpd;
     httpd_callbacks_t httpd_cbs;
@@ -411,7 +411,7 @@ raop_init(int max_clients, raop_callbacks_t *callbacks) {
     }
 
     /* Allocate the raop_t structure */
-    raop = calloc(1, sizeof(raop_t));
+    raop = calloc(1, sizeof(struct raop_t));
     if (!raop) {
         return NULL;
     }
@@ -466,7 +466,7 @@ raop_init(int max_clients, raop_callbacks_t *callbacks) {
 }
 
 void
-raop_destroy(raop_t *raop) {
+raop_destroy(struct raop_t *raop) {
     if (raop) {
         raop_stop(raop);
         pairing_destroy(raop->pairing);
@@ -480,20 +480,20 @@ raop_destroy(raop_t *raop) {
 }
 
 int
-raop_is_running(raop_t *raop) {
+raop_is_running(struct raop_t *raop) {
     assert(raop);
 
     return httpd_is_running(raop->httpd);
 }
 
 void
-raop_set_log_level(raop_t *raop, int level) {
+raop_set_log_level(struct raop_t *raop, int level) {
     assert(raop);
 
     logger_set_level(raop->logger, level);
 }
 
-int raop_set_plist(raop_t *raop, const char *plist_item, const int value) {
+int raop_set_plist(struct raop_t *raop, const char *plist_item, const int value) {
     int retval = 0;
     assert(raop);
     assert(plist_item);
@@ -526,13 +526,13 @@ int raop_set_plist(raop_t *raop, const char *plist_item, const int value) {
 }
 
 void
-raop_set_port(raop_t *raop, unsigned short port) {
+raop_set_port(struct raop_t *raop, unsigned short port) {
     assert(raop);
     raop->port = port;
 }
 
 void
-raop_set_udp_ports(raop_t *raop, unsigned short udp[3]) {
+raop_set_udp_ports(struct raop_t *raop, unsigned short udp[3]) {
     assert(raop);
     raop->timing_lport = udp[0]; 
     raop->control_lport = udp[1];
@@ -540,47 +540,47 @@ raop_set_udp_ports(raop_t *raop, unsigned short udp[3]) {
 }
 
 void
-raop_set_tcp_ports(raop_t *raop, unsigned short tcp[2]) {
+raop_set_tcp_ports(struct raop_t *raop, unsigned short tcp[2]) {
     assert(raop);
     raop->mirror_data_lport = tcp[0];
     raop->port = tcp[1];
 }
 
 unsigned short
-raop_get_port(raop_t *raop) {
+raop_get_port(struct raop_t *raop) {
     assert(raop);
     return raop->port;
 }
 
 void *
-raop_get_callback_cls(raop_t *raop) {
+raop_get_callback_cls(struct raop_t *raop) {
     assert(raop);
     return raop->callbacks.cls;
 }
 
 void
-raop_set_log_callback(raop_t *raop, raop_log_callback_t callback, void *cls) {
+raop_set_log_callback(struct raop_t *raop, raop_log_callback_t callback, void *cls) {
     assert(raop);
 
     logger_set_callback(raop->logger, callback, cls);
 }
 
 void
-raop_set_dnssd(raop_t *raop, dnssd_t *dnssd) {
+raop_set_dnssd(struct raop_t *raop, dnssd_t *dnssd) {
     assert(dnssd);
     raop->dnssd = dnssd;
 }
 
 
 int
-raop_start(raop_t *raop, unsigned short *port) {
+raop_start(struct raop_t *raop, unsigned short *port) {
     assert(raop);
     assert(port);
     return httpd_start(raop->httpd, port);
 }
 
 void
-raop_stop(raop_t *raop) {
+raop_stop(struct raop_t *raop) {
     assert(raop);
     httpd_stop(raop->httpd);
 }
