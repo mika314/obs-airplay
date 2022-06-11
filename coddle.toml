@@ -1,0 +1,2 @@
+shared=true
+cflags="-fPIC"
