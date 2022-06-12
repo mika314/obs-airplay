@@ -30,12 +30,12 @@ static auto sourceUpdate(void *v, obs_data_t *data) -> void
 
 static auto sourceWidth(void *v) -> uint32_t
 {
-  return static_cast<AirPlay *>(v)->width();
+  return static_cast<AirPlay *>(v)->getWidth();
 }
 
 static auto sourceHeight(void *v) -> uint32_t
 {
-  return static_cast<AirPlay *>(v)->height();
+  return static_cast<AirPlay *>(v)->getHeight();
 }
 
 static struct obs_source_info source = {.id = "AirPlay",

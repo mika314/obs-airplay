@@ -137,7 +137,6 @@ auto AirPlay::stop_raop_server() -> int
 
 auto AirPlay::start_raop_server(std::vector<char> hw_addr,
                                 std::string name,
-                                unsigned short display[5],
                                 unsigned short tcp[3],
                                 unsigned short udp[3],
                                 bool debug_log) -> int
@@ -169,16 +168,16 @@ auto AirPlay::start_raop_server(std::vector<char> hw_addr,
   /* write desired display pixel width, pixel height, refresh_rate, max_fps, overscanned.  */
   /* use 0 for default values 1920,1080,60,30,0; these are sent to the Airplay client      */
 
-  if (display[0])
-    raop_set_plist(raop, "width", (int)display[0]);
-  if (display[1])
-    raop_set_plist(raop, "height", (int)display[1]);
-  if (display[2])
-    raop_set_plist(raop, "refreshRate", (int)display[2]);
-  if (display[3])
-    raop_set_plist(raop, "maxFPS", (int)display[3]);
-  if (display[4])
-    raop_set_plist(raop, "overscanned", (int)display[4]);
+  //  if (display[0])
+  //    raop_set_plist(raop, "width", (int)display[0]);
+  //  if (display[1])
+  //    raop_set_plist(raop, "height", (int)display[1]);
+  //  if (display[2])
+  //    raop_set_plist(raop, "refreshRate", (int)display[2]);
+  //  if (display[3])
+  //    raop_set_plist(raop, "maxFPS", (int)display[3]);
+  //  if (display[4])
+  //    raop_set_plist(raop, "overscanned", (int)display[4]);
 
   raop_set_plist(raop, "max_ntp_timeouts", max_ntp_timeouts);
 
@@ -227,7 +226,6 @@ auto AirPlay::conn_init(void *cls) -> void
   self->open_connections++;
   self->connections_stopped = false;
   LOG("Open connections:", self->open_connections);
-  // video_renderer_update_background(1);
 }
 
 auto AirPlay::conn_destroy(void *cls) -> void
@@ -268,22 +266,23 @@ auto AirPlay::audio_process(void * /*cls*/, raop_ntp_t * /*ntp*/, audio_decode_s
   LOG(__func__);
 }
 
-auto AirPlay::video_process(void * /*cls*/, raop_ntp_t * /*ntp*/, h264_decode_struct * /*data*/) -> void
+auto AirPlay::video_process(void *cls, raop_ntp_t * /*ntp*/, h264_decode_struct *data) -> void
+{
+  auto self = static_cast<AirPlay *>(cls);
+  self->render(data);
+}
+
+auto AirPlay::audio_flush(void * /*cls*/) -> void
 {
   LOG(__func__);
 }
 
-auto AirPlay::audio_flush(void * /*cls*/) -> void 
+auto AirPlay::video_flush(void * /*cls*/) -> void
 {
   LOG(__func__);
 }
 
-auto AirPlay::video_flush(void * /*cls*/) -> void 
-{
-  LOG(__func__);
-}
-
-auto AirPlay::audio_set_volume(void * /*cls*/, float volume) -> void 
+auto AirPlay::audio_set_volume(void * /*cls*/, float volume) -> void
 {
   LOG(__func__, volume);
 }
@@ -311,13 +310,16 @@ auto AirPlay::audio_get_format(void * /*cls*/,
   (void)type;
 }
 
-auto AirPlay::video_report_size(void * /*cls*/,
+auto AirPlay::video_report_size(void *cls,
                                 float *width_source,
                                 float *height_source,
                                 float *width,
                                 float *height) -> void
 {
+  auto self = static_cast<AirPlay *>(cls);
   LOG("video_report_size:", *width_source, *height_source, *width, *height);
+  self->width = *width_source;
+  self->height = *height_source;
 }
 
 auto AirPlay::audio_set_metadata(void * /*cls*/, const void *buffer, int buflen) -> void
@@ -403,58 +405,45 @@ auto AirPlay::log_callback(void * /*cls*/, int level, const char *msg) -> void
 AirPlay::AirPlay(struct obs_data *data, struct obs_source *obsSource)
   : data(data),
     obsSource(obsSource),
-    frame(std::make_unique<obs_source_frame>()),
+    obsFrame(std::make_unique<obs_source_frame>()),
     thread(&AirPlay::run, this)
 {
 }
 
-auto AirPlay::render() -> void
+auto AirPlay::render(const h264_decode_struct *pkt) -> void
 {
   if (!obsSource)
     return;
 
-  rgba.resize(100 * 100 * 4);
+  decoder.decode({pkt->data, pkt->data + pkt->data_len}, frame);
+  obsFrame->width = frame.width;
+  obsFrame->height = frame.height;
+  obsFrame->format = frame.format;
 
-  frame->data[0] = rgba.data();
-  frame->linesize[0] = 100 * 4;
-  frame->width = 100;
-  frame->height = 100;
-  frame->format = VIDEO_FORMAT_RGBA;
+  for (auto i = 0U; i < frame.planes.size(); ++i)
+  {
+    obsFrame->data[i] = frame.planes[i].data.data();
+    obsFrame->linesize[i] = frame.planes[i].linesize;
+  }
+  for (auto i = frame.planes.size(); i < MAX_AV_PLANES; i++)
+  {
+    obsFrame->data[i] = nullptr;
+    obsFrame->linesize[i] = 0;
+  }
 
   // set current time in ns
-  const auto nowNs = std::chrono::duration_cast<std::chrono::nanoseconds>(
-                       std::chrono::system_clock::now().time_since_epoch())
-                       .count();
-  frame->timestamp = nowNs;
-
-  const auto whiteLine = static_cast<int>(nowNs / 80'000'000 % 100);
-  for (auto x = 0; x < 100; ++x)
-    for (auto y = 0; y < 100; ++y)
-    {
-      if (x == whiteLine)
-      {
-        rgba[(x * 100 + y) * 4 + 0] = 0xff;
-        rgba[(x * 100 + y) * 4 + 1] = 0xff;
-        rgba[(x * 100 + y) * 4 + 2] = 0xff;
-        rgba[(x * 100 + y) * 4 + 3] = 0xff;
-        continue;
-      }
-      rgba[(x * 100 + y) * 4 + 0] = rand() % 256;
-      rgba[(x * 100 + y) * 4 + 1] = rand() % 256;
-      rgba[(x * 100 + y) * 4 + 2] = rand() % 256;
-      rgba[(x * 100 + y) * 4 + 3] = 0x80;
-    }
-  obs_source_output_video(obsSource, frame.get());
+  obsFrame->timestamp = pkt->pts * 1'000;
+  obs_source_output_video(obsSource, obsFrame.get());
 }
 
-auto AirPlay::width() const -> int
+auto AirPlay::getWidth() const -> int
 {
-  return 100;
+  return width;
 }
 
-auto AirPlay::height() const -> int
+auto AirPlay::getHeight() const -> int
 {
-  return 100;
+  return height;
 }
 
 auto AirPlay::name() const -> const char *
@@ -467,7 +456,7 @@ auto AirPlay::run() -> void
   std::vector<char> server_hw_addr;
   bool use_random_hw_addr = false;
   bool debug_log = DEFAULT_DEBUG_LOG;
-  unsigned short display[5] = {0}, tcp[3] = {0}, udp[3] = {0};
+  unsigned short tcp[3] = {0}, udp[3] = {0};
 
 #ifdef SUPPRESS_AVAHI_COMPAT_WARNING
   // suppress avahi_compat nag message.  avahi emits a "nag" warning (once)
@@ -497,7 +486,8 @@ auto AirPlay::run() -> void
   mac_address.clear();
 
   connections_stopped = true;
-  if (start_raop_server(server_hw_addr, server_name, display, tcp, udp, debug_log) != 0)
+
+  if (start_raop_server(server_hw_addr, server_name, tcp, udp, debug_log) != 0)
   {
     LOG("start_raop_server failed");
     return;
@@ -506,10 +496,7 @@ auto AirPlay::run() -> void
   compression_type = 0;
 
   while (!done)
-  {
-    render();
     std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 30));
-  }
 
   LOG("Stopping...");
   stop_raop_server();

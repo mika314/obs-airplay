@@ -1,4 +1,5 @@
 #pragma once
+#include "h264-decoder.hpp"
 #include <memory>
 #include <thread>
 #include <vector>
@@ -8,16 +9,15 @@ class AirPlay
 public:
   AirPlay(struct obs_data *data, struct obs_source *obsSource);
   ~AirPlay();
-  auto width() const -> int;
-  auto height() const -> int;
+  auto getWidth() const -> int;
+  auto getHeight() const -> int;
   auto name() const -> const char *;
 
 private:
   auto run() -> void;
-  auto render() -> void;
+  auto render(const struct h264_decode_s *data) -> void;
   auto start_raop_server(std::vector<char> hw_addr,
                          std::string name,
-                         unsigned short display[5],
                          unsigned short tcp[3],
                          unsigned short udp[3],
                          bool debug_log) -> int;
@@ -49,8 +49,9 @@ private:
 
   struct obs_data *data;
   struct obs_source *obsSource;
-  std::unique_ptr<struct obs_source_frame> frame;
-  std::vector<unsigned char> rgba;
+  std::unique_ptr<struct obs_source_frame> obsFrame;
+  Frame frame;
+  H264Decoder decoder;
   bool done = false;
   std::thread thread;
   bool connections_stopped = false;
@@ -59,4 +60,6 @@ private:
   struct raop_t *raop = NULL;
   struct dnssd_s *dnssd = NULL;
   int open_connections = 0;
+  int width = 100;
+  int height = 100;
 };

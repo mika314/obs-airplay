@@ -56,7 +56,7 @@ unsigned char* message_table_index(int i)
    return &table_s2[(97*i % 144) << 8];   
 }
 
-void print_block(char* msg, unsigned char* dword)
+void print_block(char* /*msg*/, unsigned char* /*dword*/)
 {
    printf("%s", msg);
    for (int i = 0; i < 16; i++)

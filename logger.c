@@ -75,6 +75,7 @@ logger_set_callback(logger_t *logger, logger_callback_t callback, void *cls)
 static char *
 logger_utf8_to_local(const char *str)
 {
+  (void)str;
 	char *ret = NULL;
 
 /* FIXME: This is only implemented on Windows for now */

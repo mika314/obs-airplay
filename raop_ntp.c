@@ -460,7 +460,7 @@ uint64_t raop_ntp_timestamp_to_micro_seconds(uint64_t ntp_timestamp, bool accoun
  * Returns the current time in micro seconds according to the local wall clock.
  * The system Unix time is used as the local wall clock.
  */
-uint64_t raop_ntp_get_local_time(raop_ntp_t *raop_ntp) {
+uint64_t raop_ntp_get_local_time(raop_ntp_t */*raop_ntp*/) {
     struct timespec time;
     clock_gettime(CLOCK_REALTIME, &time);
     return (uint64_t)time.tv_sec * 1000000L + (uint64_t)(time.tv_nsec / 1000);

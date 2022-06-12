@@ -26,7 +26,7 @@ typedef void (*raop_handler_t)(raop_conn_t *, http_request_t *,
 
 static void
 raop_handler_info(raop_conn_t *conn,
-                  http_request_t *request, http_response_t *response,
+                  http_request_t */*request*/, http_response_t *response,
                   char **response_data, int *response_datalen)
 {
     assert(conn->raop->dnssd);
@@ -294,9 +294,9 @@ raop_handler_fpsetup(raop_conn_t *conn,
 }
 
 static void
-raop_handler_options(raop_conn_t *conn,
-                     http_request_t *request, http_response_t *response,
-                     char **response_data, int *response_datalen)
+raop_handler_options(raop_conn_t */*conn*/,
+                     http_request_t */*request*/, http_response_t *response,
+                     char **/*response_data*/, int */*response_datalen*/)
 {
     http_response_add_header(response, "Public", "SETUP, RECORD, PAUSE, FLUSH, TEARDOWN, OPTIONS, GET_PARAMETER, SET_PARAMETER");
 }
@@ -602,8 +602,8 @@ raop_handler_get_parameter(raop_conn_t *conn,
 
 static void
 raop_handler_set_parameter(raop_conn_t *conn,
-                           http_request_t *request, http_response_t *response,
-                           char **response_data, int *response_datalen)
+                           http_request_t *request, http_response_t */*response*/,
+                           char **/*response_data*/, int */*response_datalen*/)
 {
     const char *content_type;
     const char *data;
@@ -649,16 +649,16 @@ raop_handler_set_parameter(raop_conn_t *conn,
 
 static void
 raop_handler_feedback(raop_conn_t *conn,
-                      http_request_t *request, http_response_t *response,
-                      char **response_data, int *response_datalen)
+                      http_request_t */*request*/, http_response_t */*response*/,
+                      char **/*response_data*/, int */*response_datalen*/)
 {
     logger_log(conn->raop->logger, LOGGER_DEBUG, "raop_handler_feedback");
 }
 
 static void
 raop_handler_record(raop_conn_t *conn,
-                    http_request_t *request, http_response_t *response,
-                    char **response_data, int *response_datalen)
+                    http_request_t */*request*/, http_response_t *response,
+                    char **/*response_data*/, int */*response_datalen*/)
 {
     logger_log(conn->raop->logger, LOGGER_DEBUG, "raop_handler_record");
     http_response_add_header(response, "Audio-Latency", "11025");

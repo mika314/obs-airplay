@@ -8218,8 +8218,8 @@ int llhttp__on_status(
 
 int llhttp__internal__c_update_finish(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   state->finish = 2;
   return 0;
 }
@@ -8230,15 +8230,15 @@ int llhttp__on_message_begin(
 
 int llhttp__internal__c_load_type(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   return state->type;
 }
 
 int llhttp__internal__c_store_method(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp,
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/,
     int match) {
   state->method = match;
   return 0;
@@ -8246,23 +8246,23 @@ int llhttp__internal__c_store_method(
 
 int llhttp__internal__c_is_equal_method(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   return state->method == 5;
 }
 
 int llhttp__internal__c_update_http_major(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   state->http_major = 0;
   return 0;
 }
 
 int llhttp__internal__c_update_http_minor(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   state->http_minor = 9;
   return 0;
 }
@@ -8273,8 +8273,8 @@ int llhttp__on_url_complete(
 
 int llhttp__internal__c_test_flags(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   return (state->flags & 128) == 128;
 }
 
@@ -8288,8 +8288,8 @@ int llhttp__on_message_complete(
 
 int llhttp__internal__c_is_equal_upgrade(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   return state->upgrade == 1;
 }
 
@@ -8299,30 +8299,30 @@ int llhttp__after_message_complete(
 
 int llhttp__internal__c_update_finish_1(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   state->finish = 0;
   return 0;
 }
 
 int llhttp__internal__c_test_lenient_flags(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   return (state->lenient_flags & 4) == 4;
 }
 
 int llhttp__internal__c_test_flags_1(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   return (state->flags & 544) == 544;
 }
 
 int llhttp__internal__c_test_lenient_flags_1(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   return (state->lenient_flags & 2) == 2;
 }
 
@@ -8340,16 +8340,16 @@ int llhttp__after_headers_complete(
 
 int llhttp__internal__c_update_content_length(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   state->content_length = 0;
   return 0;
 }
 
 int llhttp__internal__c_mul_add_content_length(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp,
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/,
     int match) {
   /* Multiplication overflow */
   if (state->content_length > 0xffffffffffffffffULL / 16) {
@@ -8378,47 +8378,47 @@ int llhttp__on_chunk_header(
 
 int llhttp__internal__c_is_equal_content_length(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   return state->content_length == 0;
 }
 
 int llhttp__internal__c_or_flags(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   state->flags |= 128;
   return 0;
 }
 
 int llhttp__internal__c_update_finish_3(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   state->finish = 1;
   return 0;
 }
 
 int llhttp__internal__c_or_flags_1(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   state->flags |= 64;
   return 0;
 }
 
 int llhttp__internal__c_update_upgrade(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   state->upgrade = 1;
   return 0;
 }
 
 int llhttp__internal__c_store_header_state(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp,
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/,
     int match) {
   state->header_state = match;
   return 0;
@@ -8426,8 +8426,8 @@ int llhttp__internal__c_store_header_state(
 
 int llhttp__internal__c_test_lenient_flags_2(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   return (state->lenient_flags & 1) == 1;
 }
 
@@ -8437,23 +8437,23 @@ int llhttp__on_header_field_complete(
 
 int llhttp__internal__c_load_header_state(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   return state->header_state;
 }
 
 int llhttp__internal__c_or_flags_3(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   state->flags |= 1;
   return 0;
 }
 
 int llhttp__internal__c_update_header_state(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   state->header_state = 1;
   return 0;
 }
@@ -8464,71 +8464,71 @@ int llhttp__on_header_value_complete(
 
 int llhttp__internal__c_or_flags_4(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   state->flags |= 2;
   return 0;
 }
 
 int llhttp__internal__c_or_flags_5(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   state->flags |= 4;
   return 0;
 }
 
 int llhttp__internal__c_or_flags_6(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   state->flags |= 8;
   return 0;
 }
 
 int llhttp__internal__c_update_header_state_2(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   state->header_state = 6;
   return 0;
 }
 
 int llhttp__internal__c_update_header_state_4(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   state->header_state = 0;
   return 0;
 }
 
 int llhttp__internal__c_update_header_state_5(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   state->header_state = 5;
   return 0;
 }
 
 int llhttp__internal__c_update_header_state_6(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   state->header_state = 7;
   return 0;
 }
 
 int llhttp__internal__c_test_flags_2(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   return (state->flags & 32) == 32;
 }
 
 int llhttp__internal__c_mul_add_content_length_1(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp,
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/,
     int match) {
   /* Multiplication overflow */
   if (state->content_length > 0xffffffffffffffffULL / 10) {
@@ -8553,55 +8553,55 @@ int llhttp__internal__c_mul_add_content_length_1(
 
 int llhttp__internal__c_or_flags_15(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   state->flags |= 32;
   return 0;
 }
 
 int llhttp__internal__c_or_flags_16(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   state->flags |= 512;
   return 0;
 }
 
 int llhttp__internal__c_and_flags(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   state->flags &= -9;
   return 0;
 }
 
 int llhttp__internal__c_update_header_state_7(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   state->header_state = 8;
   return 0;
 }
 
 int llhttp__internal__c_or_flags_17(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   state->flags |= 16;
   return 0;
 }
 
 int llhttp__internal__c_load_method(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   return state->method;
 }
 
 int llhttp__internal__c_store_http_major(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp,
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/,
     int match) {
   state->http_major = match;
   return 0;
@@ -8609,8 +8609,8 @@ int llhttp__internal__c_store_http_major(
 
 int llhttp__internal__c_store_http_minor(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp,
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/,
     int match) {
   state->http_minor = match;
   return 0;
@@ -8618,16 +8618,16 @@ int llhttp__internal__c_store_http_minor(
 
 int llhttp__internal__c_update_status_code(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   state->status_code = 0;
   return 0;
 }
 
 int llhttp__internal__c_mul_add_status_code(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp,
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/,
     int match) {
   /* Multiplication overflow */
   if (state->status_code > 0xffff / 10) {
@@ -8661,16 +8661,16 @@ int llhttp__on_status_complete(
 
 int llhttp__internal__c_update_type(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   state->type = 1;
   return 0;
 }
 
 int llhttp__internal__c_update_type_1(
     llhttp__internal_t* state,
-    const unsigned char* p,
-    const unsigned char* endp) {
+    const unsigned char* /*p*/,
+    const unsigned char* /*endp*/) {
   state->type = 2;
   return 0;
 }

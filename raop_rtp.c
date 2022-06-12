@@ -242,7 +242,7 @@ raop_rtp_resend_callback(void *opaque, unsigned short seqnum, unsigned short cou
 }
 
 static int
-raop_rtp_init_sockets(raop_rtp_t *raop_rtp, int use_ipv6, int use_udp)
+raop_rtp_init_sockets(raop_rtp_t *raop_rtp, int use_ipv6, int /*use_udp*/)
 {
     assert(raop_rtp);
 
@@ -273,7 +273,7 @@ raop_rtp_init_sockets(raop_rtp_t *raop_rtp, int use_ipv6, int use_udp)
 }
 
 static int
-raop_rtp_process_events(raop_rtp_t *raop_rtp, void *cb_data)
+raop_rtp_process_events(raop_rtp_t *raop_rtp, void */*cb_data*/)
 {
     int flush;
     float volume;
