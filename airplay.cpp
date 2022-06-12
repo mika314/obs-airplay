@@ -252,7 +252,7 @@ auto AirPlay::conn_reset(void *cls, int timeouts, bool reset_video) -> void
         "   the default timeout limit n = %d can be changed with the \"-reset n\" option",
         NTP_TIMEOUT_LIMIT);
   }
-  printf("reset_video %d\n", (int)reset_video);
+  LOG("reset_video", reset_video);
   raop_stop(self->raop);
 }
 
@@ -403,11 +403,49 @@ auto AirPlay::log_callback(void * /*cls*/, int level, const char *msg) -> void
 }
 
 AirPlay::AirPlay(struct obs_data *data, struct obs_source *obsSource)
-  : data(data),
-    obsSource(obsSource),
-    obsFrame(std::make_unique<obs_source_frame>()),
-    thread(&AirPlay::run, this)
+  : data(data), obsSource(obsSource), obsFrame(std::make_unique<obs_source_frame>())
 {
+  std::vector<char> server_hw_addr;
+  bool use_random_hw_addr = false;
+  bool debug_log = DEFAULT_DEBUG_LOG;
+  unsigned short tcp[3] = {0}, udp[3] = {0};
+
+#ifdef SUPPRESS_AVAHI_COMPAT_WARNING
+  // suppress avahi_compat nag message.  avahi emits a "nag" warning (once)
+  // if  getenv("AVAHI_COMPAT_NOWARN") returns null.
+  static char avahi_compat_nowarn[] = "AVAHI_COMPAT_NOWARN=1";
+  if (!getenv("AVAHI_COMPAT_NOWARN"))
+    putenv(avahi_compat_nowarn);
+#endif
+
+  if (udp[0])
+    LOG("using network ports UDP", udp[0], udp[1], udp[2], "TCP", tcp[0], tcp[1], tcp[2]);
+
+  std::string mac_address;
+  if (!use_random_hw_addr)
+    mac_address = find_mac();
+  if (mac_address.empty())
+  {
+    srand(time(NULL) * getpid());
+    mac_address = random_mac();
+    LOG("using randomly-generated MAC address", mac_address);
+  }
+  else
+  {
+    LOG("using system MAC address", mac_address);
+  }
+  parse_hw_addr(mac_address, server_hw_addr);
+  mac_address.clear();
+
+  connections_stopped = true;
+
+  if (start_raop_server(server_hw_addr, server_name, tcp, udp, debug_log) != 0)
+  {
+    LOG("start_raop_server failed");
+    return;
+  }
+  counter = 0;
+  compression_type = 0;
 }
 
 auto AirPlay::render(const h264_decode_struct *pkt) -> void
@@ -451,59 +489,8 @@ auto AirPlay::name() const -> const char *
   return "AirPlay";
 }
 
-auto AirPlay::run() -> void
-{
-  std::vector<char> server_hw_addr;
-  bool use_random_hw_addr = false;
-  bool debug_log = DEFAULT_DEBUG_LOG;
-  unsigned short tcp[3] = {0}, udp[3] = {0};
-
-#ifdef SUPPRESS_AVAHI_COMPAT_WARNING
-  // suppress avahi_compat nag message.  avahi emits a "nag" warning (once)
-  // if  getenv("AVAHI_COMPAT_NOWARN") returns null.
-  static char avahi_compat_nowarn[] = "AVAHI_COMPAT_NOWARN=1";
-  if (!getenv("AVAHI_COMPAT_NOWARN"))
-    putenv(avahi_compat_nowarn);
-#endif
-
-  if (udp[0])
-    LOG("using network ports UDP", udp[0], udp[1], udp[2], "TCP", tcp[0], tcp[1], tcp[2]);
-
-  std::string mac_address;
-  if (!use_random_hw_addr)
-    mac_address = find_mac();
-  if (mac_address.empty())
-  {
-    srand(time(NULL) * getpid());
-    mac_address = random_mac();
-    LOG("using randomly-generated MAC address", mac_address);
-  }
-  else
-  {
-    LOG("using system MAC address", mac_address);
-  }
-  parse_hw_addr(mac_address, server_hw_addr);
-  mac_address.clear();
-
-  connections_stopped = true;
-
-  if (start_raop_server(server_hw_addr, server_name, tcp, udp, debug_log) != 0)
-  {
-    LOG("start_raop_server failed");
-    return;
-  }
-  counter = 0;
-  compression_type = 0;
-
-  while (!done)
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000 / 30));
-
-  LOG("Stopping...");
-  stop_raop_server();
-}
-
 AirPlay::~AirPlay()
 {
-  done = true;
-  thread.join();
+  LOG("Stopping...");
+  stop_raop_server();
 }

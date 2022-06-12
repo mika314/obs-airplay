@@ -46,7 +46,8 @@ static struct obs_source_info source = {.id = "AirPlay",
                                         .destroy = sourceDestroy,
                                         .get_width = sourceWidth,
                                         .get_height = sourceHeight,
-                                        .update = sourceUpdate};
+                                        .update = sourceUpdate,
+                                        .icon_type = OBS_ICON_TYPE_DESKTOP_CAPTURE};
 
 bool obs_module_load(void)
 {
