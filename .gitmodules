@@ -1,0 +1,3 @@
+[submodule "UxPlay"]
+	path = UxPlay
+	url = https://github.com/FDH2/UxPlay.git

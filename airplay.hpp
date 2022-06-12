@@ -1,6 +1,7 @@
 #pragma once
 #include "h264-decoder.hpp"
 #include <memory>
+#include <stream.h>
 #include <thread>
 #include <vector>
 
@@ -15,7 +16,7 @@ public:
 
 private:
   auto run() -> void;
-  auto render(const struct h264_decode_s *data) -> void;
+  auto render(const h264_decode_struct *data) -> void;
   auto start_raop_server(std::vector<char> hw_addr,
                          std::string name,
                          unsigned short tcp[3],
@@ -31,7 +32,7 @@ private:
                                bool *usingScreen,
                                bool *isMedia,
                                uint64_t *audioFormat) -> void;
-  static auto audio_process(void *cls, struct raop_ntp_s *ntp, struct audio_decode_s *data) -> void;
+  static auto audio_process(void *cls, struct raop_ntp_s *ntp, audio_decode_struct *data) -> void;
   static auto audio_set_metadata(void *cls, const void *buffer, int buflen) -> void;
   static auto audio_set_volume(void *cls, float volume) -> void;
   static auto conn_destroy(void *cls) -> void;
@@ -40,7 +41,7 @@ private:
   static auto conn_teardown(void *cls, bool *teardown_96, bool *teardown_110) -> void;
   static auto log_callback(void *cls, int level, const char *msg) -> void;
   static auto video_flush(void *cls) -> void;
-  static auto video_process(void *cls, struct raop_ntp_s *ntp, struct h264_decode_s *data) -> void;
+  static auto video_process(void *cls, struct raop_ntp_s *ntp, h264_decode_struct *data) -> void;
   static auto video_report_size(void *cls,
                                 float *width_source,
                                 float *height_source,
@@ -57,7 +58,7 @@ private:
   bool connections_stopped = false;
   unsigned int counter = 0;
   unsigned char compression_type = 0;
-  struct raop_t *raop = NULL;
+  struct raop_s *raop = NULL;
   struct dnssd_s *dnssd = NULL;
   int open_connections = 0;
   int width = 100;
