@@ -2,6 +2,8 @@
 
 OBS plugin to capture screen mirroring from iOS and macOS devices
 
+[![I made an AirPlay plugin for OBS](https://user-images.githubusercontent.com/1877406/173214368-17392f78-5af7-4161-a57a-e1b8002c2dd3.png)](https://youtu.be/yN5SMHl9JdY "I made an AirPlay plugin for OBS")
+
 ## Build Instructions
 
 ### Ubuntu-Like OSes 22.04
