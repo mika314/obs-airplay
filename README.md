@@ -8,7 +8,7 @@ OBS plugin to capture screen mirroring from iOS and macOS devices
 
 #### Install Dependencies
 ```bash
-sudo apt-get install -y clang pkg-config libavcodec-dev libavformat-dev libavutil-dev libswresample-dev git
+sudo apt-get install -y clang pkg-config libavcodec-dev libavformat-dev libavutil-dev libswresample-dev git libobs-dev libavahi-compat-libdnssd-dev libplist-dev
 ```
 
 #### Install Build Tool `coddle` if not Installed
