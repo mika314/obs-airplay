@@ -9,7 +9,7 @@ struct Plane
   int linesize;
 };
 
-struct Frame
+struct VFrame
 {
   std::vector<Plane> planes;
   int width;
@@ -22,11 +22,11 @@ class H264Decoder
 public:
   H264Decoder();
   ~H264Decoder();
-  auto decode(std::span<const uint8_t> data, Frame &) -> void;
+  auto decode(std::span<const uint8_t> data) -> const VFrame *;
 
 private:
   struct AVCodec *codec;
-  struct AVCodecContext *c;
+  struct AVCodecContext *ctx;
   struct AVFrame *yuvPicture;
   struct AVFrame *rgbPicture;
   struct AVPacket *pkt;
@@ -34,4 +34,5 @@ private:
   uint8_t *buffer = nullptr;
   int lastWidth = 0;
   int lastHeight = 0;
+  VFrame frame;
 };

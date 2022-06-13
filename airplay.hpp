@@ -1,4 +1,5 @@
 #pragma once
+#include "audio-decoder.hpp"
 #include "h264-decoder.hpp"
 #include <memory>
 #include <stream.h>
@@ -14,6 +15,7 @@ public:
   auto name() const -> const char *;
 
 private:
+  auto render(const audio_decode_struct *data) -> void;
   auto render(const h264_decode_struct *data) -> void;
   auto start_raop_server(std::vector<char> hw_addr,
                          std::string name,
@@ -46,11 +48,12 @@ private:
                                 float *width,
                                 float *height) -> void;
 
-  struct obs_data *data;
+  struct obs_data *obsData;
   struct obs_source *obsSource;
-  std::unique_ptr<struct obs_source_frame> obsFrame;
-  Frame frame;
-  H264Decoder decoder;
+  std::unique_ptr<struct obs_source_frame> obsVFrame;
+  H264Decoder vDecoder;
+  std::unique_ptr<struct obs_source_audio> obsAFrame;
+  AudioDecoder aDecoder;
   bool connections_stopped = false;
   unsigned int counter = 0;
   unsigned char compression_type = 0;

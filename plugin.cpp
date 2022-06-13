@@ -40,7 +40,7 @@ static auto sourceHeight(void *v) -> uint32_t
 
 static struct obs_source_info source = {.id = "AirPlay",
                                         .type = OBS_SOURCE_TYPE_INPUT,
-                                        .output_flags = OBS_SOURCE_ASYNC_VIDEO,
+                                        .output_flags = OBS_SOURCE_ASYNC_VIDEO | OBS_SOURCE_AUDIO,
                                         .get_name = sourceName,
                                         .create = sourceCreate,
                                         .destroy = sourceDestroy,

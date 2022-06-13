@@ -12,7 +12,7 @@ extern "C" {
 
 H264Decoder::H264Decoder()
   : codec(avcodec_find_decoder(AV_CODEC_ID_H264)),
-    c(avcodec_alloc_context3(codec)),
+    ctx(avcodec_alloc_context3(codec)),
     yuvPicture(av_frame_alloc()),
     rgbPicture(av_frame_alloc()),
     pkt(av_packet_alloc())
@@ -21,7 +21,7 @@ H264Decoder::H264Decoder()
   {
     throw std::runtime_error("H264Decoder: avcodec_find_decoder failed");
   }
-  if (avcodec_open2(c, codec, NULL) < 0)
+  if (avcodec_open2(ctx, codec, NULL) < 0)
   {
     throw std::runtime_error("H264Decoder: avcodec_open2 failed");
   }
@@ -29,8 +29,8 @@ H264Decoder::H264Decoder()
 
 H264Decoder::~H264Decoder()
 {
-  avcodec_close(c);
-  av_free(c);
+  avcodec_close(ctx);
+  av_free(ctx);
   av_free(yuvPicture);
   av_free(rgbPicture);
   av_free(pkt);
@@ -38,23 +38,23 @@ H264Decoder::~H264Decoder()
     sws_freeContext(swsContext);
 }
 
-auto H264Decoder::decode(std::span<const uint8_t> data, Frame &frame) -> void
+auto H264Decoder::decode(std::span<const uint8_t> data) -> const VFrame *
 {
   pkt->data = const_cast<uint8_t *>(data.data());
   pkt->size = data.size();
   int got_picture = 0;
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-  const auto result = avcodec_decode_video2(c, yuvPicture, &got_picture, pkt);
+  const auto result = avcodec_decode_video2(ctx, yuvPicture, &got_picture, pkt);
 #pragma GCC diagnostic pop
   if (result < 0)
-    return;
+    return nullptr;
   if (yuvPicture->linesize[0] == 0)
-    return;
+    return nullptr;
   char pixDesc[255];
   av_get_pix_fmt_string(pixDesc, 255, static_cast<AVPixelFormat>(yuvPicture->format));
   if (!got_picture)
-    return;
+    return nullptr;
 
   if (yuvPicture->width != lastWidth || yuvPicture->height != lastHeight)
   {
@@ -112,4 +112,5 @@ auto H264Decoder::decode(std::span<const uint8_t> data, Frame &frame) -> void
       frame.planes[i].data.data(), rgbPicture->data[i], rgbPicture->linesize[i] * rgbPicture->height);
     frame.planes[i].linesize = rgbPicture->linesize[i];
   }
+  return &frame;
 }

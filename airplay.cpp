@@ -261,9 +261,10 @@ auto AirPlay::conn_teardown(void * /*cls*/, bool *teardown_96, bool *teardown_11
   LOG(__func__, *teardown_96, *teardown_110);
 }
 
-auto AirPlay::audio_process(void * /*cls*/, raop_ntp_t * /*ntp*/, audio_decode_struct * /*data*/) -> void
+auto AirPlay::audio_process(void *cls, raop_ntp_t * /*ntp*/, audio_decode_struct *data) -> void
 {
-  LOG(__func__);
+  auto self = static_cast<AirPlay *>(cls);
+  self->render(data);
 }
 
 auto AirPlay::video_process(void *cls, raop_ntp_t * /*ntp*/, h264_decode_struct *data) -> void
@@ -295,11 +296,16 @@ auto AirPlay::audio_get_format(void * /*cls*/,
                                uint64_t *audioFormat) -> void
 {
   unsigned char type;
-  LOG("ct=%d spf=%d usingScreen=%d isMedia=%d  audioFormat=0x%lx",
-      *ct,
+  *ct = 1;
+  LOG("ct=",
+      static_cast<int>(*ct),
+      "spf=",
       *spf,
+      "usingScreen=",
       *usingScreen,
+      "isMedia=",
       *isMedia,
+      "audioFormat=",
       (unsigned long)*audioFormat);
   switch (*ct)
   {
@@ -402,8 +408,11 @@ auto AirPlay::log_callback(void * /*cls*/, int level, const char *msg) -> void
   }
 }
 
-AirPlay::AirPlay(struct obs_data *data, struct obs_source *obsSource)
-  : data(data), obsSource(obsSource), obsFrame(std::make_unique<obs_source_frame>())
+AirPlay::AirPlay(struct obs_data *obsData, struct obs_source *obsSource)
+  : obsData(obsData),
+    obsSource(obsSource),
+    obsVFrame(std::make_unique<obs_source_frame>()),
+    obsAFrame(std::make_unique<obs_source_audio>())
 {
   std::vector<char> server_hw_addr;
   bool use_random_hw_addr = false;
@@ -453,25 +462,27 @@ auto AirPlay::render(const h264_decode_struct *pkt) -> void
   if (!obsSource)
     return;
 
-  decoder.decode({pkt->data, pkt->data + pkt->data_len}, frame);
-  obsFrame->width = frame.width;
-  obsFrame->height = frame.height;
-  obsFrame->format = frame.format;
+  auto vFrame = vDecoder.decode({pkt->data, pkt->data + pkt->data_len});
+  if (!vFrame)
+    return;
+  obsVFrame->width = vFrame->width;
+  obsVFrame->height = vFrame->height;
+  obsVFrame->format = vFrame->format;
 
-  for (auto i = 0U; i < frame.planes.size(); ++i)
+  for (auto i = 0U; i < vFrame->planes.size(); ++i)
   {
-    obsFrame->data[i] = frame.planes[i].data.data();
-    obsFrame->linesize[i] = frame.planes[i].linesize;
+    obsVFrame->data[i] = const_cast<uint8_t *>(vFrame->planes[i].data.data());
+    obsVFrame->linesize[i] = vFrame->planes[i].linesize;
   }
-  for (auto i = frame.planes.size(); i < MAX_AV_PLANES; i++)
+  for (auto i = vFrame->planes.size(); i < MAX_AV_PLANES; i++)
   {
-    obsFrame->data[i] = nullptr;
-    obsFrame->linesize[i] = 0;
+    obsVFrame->data[i] = nullptr;
+    obsVFrame->linesize[i] = 0;
   }
 
   // set current time in ns
-  obsFrame->timestamp = pkt->pts * 1'000;
-  obs_source_output_video(obsSource, obsFrame.get());
+  obsVFrame->timestamp = pkt->pts * 1'000;
+  obs_source_output_video(obsSource, obsVFrame.get());
 }
 
 auto AirPlay::getWidth() const -> int
@@ -493,4 +504,23 @@ AirPlay::~AirPlay()
 {
   LOG("Stopping...");
   stop_raop_server();
+}
+
+auto AirPlay::render(const audio_decode_struct *pkt) -> void
+{
+  if (!obsSource)
+    return;
+  auto aFrame = aDecoder.decode({pkt->data, pkt->data + pkt->data_len});
+  if (!aFrame)
+    return;
+
+  obsAFrame->data[0] = const_cast<uint8_t *>(reinterpret_cast<const uint8_t *>(aFrame->data.data()));
+  for (auto i = 1U; i < MAX_AV_PLANES; i++)
+    obsAFrame->data[i] = nullptr;
+  obsAFrame->frames = aFrame->data.size() / (aFrame->speakers == SPEAKERS_STEREO ? 2 : 1);
+  obsAFrame->speakers = aFrame->speakers;
+  obsAFrame->samples_per_sec = aFrame->sampleRate;
+  // set current time in ns
+  obsAFrame->timestamp = pkt->ntp_time * 1'000;
+  obs_source_output_audio(obsSource, obsAFrame.get());
 }
