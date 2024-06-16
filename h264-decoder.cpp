@@ -43,10 +43,26 @@ auto H264Decoder::decode(std::span<const uint8_t> data) -> const VFrame *
   pkt->data = const_cast<uint8_t *>(data.data());
   pkt->size = data.size();
   int got_picture = 0;
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-  const auto result = avcodec_decode_video2(ctx, yuvPicture, &got_picture, pkt);
-#pragma GCC diagnostic pop
+
+  //  SUGGESTION
+  //  Now that avcodec_decode_video2 is deprecated and replaced
+  //  by 2 calls (receive frame and send packet), this could be optimized
+  //  into separate routines or separate threads.
+  //  Also now that it always consumes a whole buffer some code
+  //  in the caller may be able to be optimized.
+  int result = avcodec_receive_frame(ctx, yuvPicture);
+  if (result == 0)
+      got_picture = 1;
+  if (result == AVERROR(EAGAIN))
+      result = 0;
+  if (result == 0)
+      result = avcodec_send_packet(ctx, pkt);
+  // The code assumes that there is always space to add a new
+  // packet. This seems risky but has always worked.
+  // It should actually check if (result == AVERROR(EAGAIN)) and then keep
+  // the packet around and try it again after processing the frame
+  // received here.
+
   if (result < 0)
     return nullptr;
   if (yuvPicture->linesize[0] == 0)

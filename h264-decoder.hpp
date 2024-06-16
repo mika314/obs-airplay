@@ -25,7 +25,7 @@ public:
   auto decode(std::span<const uint8_t> data) -> const VFrame *;
 
 private:
-  struct AVCodec *codec;
+  const struct AVCodec *codec;
   struct AVCodecContext *ctx;
   struct AVFrame *yuvPicture;
   struct AVFrame *rgbPicture;
