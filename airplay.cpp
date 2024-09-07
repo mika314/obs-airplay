@@ -61,7 +61,7 @@ static std::string find_mac()
 #else /* macOS and *BSD */
       if (ifaptr->ifa_addr->sa_family != AF_LINK)
         continue;
-      ptr = (unsigned char *)LLADDR((struct sockaddr_dl *)ifaptr->ifa_addr);
+      unsigned char *ptr = (unsigned char *)LLADDR((struct sockaddr_dl *)ifaptr->ifa_addr);
       for (int i = 0; i < 6; i++)
       {
         if ((octet[i] = *ptr) != 0)
