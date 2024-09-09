@@ -1,9 +1,27 @@
 [[library]]
-type="file"
-name="uxplay"
-path="UxPlay/lib"
-includes=["raop.h"]
-incdir="../lib"
+type="pkgconfig"
+name="fdk-aac"
+includes=["fdk-aac/aacdecoder_lib.h"]
+
+[[library]]
+type="pkgconfig"
+name="libavcodec"
+includes=["libavcodec/avcodec.h"]
+
+[[library]]
+type="pkgconfig"
+name="libavutil"
+includes=["libavutil/avutil.h", "libavutil/imgutils.h", "libavutil/pixdesc.h"]
+
+[[library]]
+type="pkgconfig"
+name="libplist-2.0"
+includes=["plist/plist.h"]
+
+[[library]]
+type="pkgconfig"
+name="libswscale"
+includes=["libswscale/swscale.h"]
 
 [[library]]
 type="file"
@@ -12,7 +30,19 @@ path="UxPlay/lib/llhttp"
 includes=["llhttp/llhttp.h"]
 
 [[library]]
+type="pkgconfig"
+name="openssl"
+includes=["openssl/evp.h", "openssl/sha.h"]
+
+[[library]]
 type="file"
 name="playfair"
 path="UxPlay/lib/playfair"
 includes=["playfair/playfair.h"]
+[[library]]
+
+type="file"
+name="uxplay"
+path="UxPlay/lib"
+includes=["raop.h"]
+incdir="../lib"
