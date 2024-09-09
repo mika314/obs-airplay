@@ -1,3 +1,14 @@
+# Backup copies of files.
 *~
+
+# The build artifact.
+/obs-airplay.dylib
 /obs-airplay.so
+
+# Tooling:
+# - build tool's state and intermediary build artifacts.
 /.coddle/
+# - cache files (e.g., clangd indexes)
+/.cache/
+# - Visual Studio Code editor configuration
+/.vscode/
