@@ -2,6 +2,7 @@
 *~
 
 # The build artifact.
+/obs-airplay.dylib
 /obs-airplay.so
 
 # Tooling:
