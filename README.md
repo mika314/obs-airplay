@@ -47,7 +47,8 @@ brew install \
     fdk-aac \
     ffmpeg \
     libplist \
-    openssl
+    openssl \
+    pkg-config
 ```
 
 #### Install the build tool
