@@ -1,5 +1,7 @@
 #include "airplay.hpp"
 #include <log/log.hpp>
+#include <map>
+#include <string>
 
 extern "C" {
 #include <obs/obs-module.h>
@@ -7,6 +9,61 @@ extern "C" {
 OBS_DECLARE_MODULE()
 
 OBS_MODULE_USE_DEFAULT_LOCALE("AirPlay", "en-US")
+
+// Embedded locale data
+static std::map<std::string, std::map<std::string, std::string>> locale_strings = {
+  {"en-US", {
+    {"ServerName", "Server Name"},
+    {"ApplyServerName", "Apply Server Name"},
+    {"ServerNameInfo", "Click 'Apply Server Name' to restart the server with the new name, or restart OBS to apply changes automatically."},
+    {"MacAddressLabel", "MAC Address Settings"},
+    {"MacAddressLabelDescription", "Configure which MAC Address is being used."},
+    {"UseRandomMac", "Use Random MAC Address"},
+    {"RandomMacInfo", "When unchecked, uses the system's MAC address. Random MAC is recommended to prevent iOS connection issues caused by device caching."}
+  }},
+  {"de-DE", {
+    {"ServerName", "Server Name"},
+    {"ApplyServerName", "Server Name anwenden"},
+    {"ServerNameInfo", "Klicken Sie auf 'Server Name anwenden', um den Server mit dem neuen Namen neu zu starten, oder starten Sie OBS neu, um Änderungen automatisch anzuwenden."},
+    {"MacAddressLabel", "MAC-Adresse Einstellungen"},
+    {"MacAddressLabelDescription", "Konfigurieren Sie, welche MAC -Adresse verwendet wird."},
+    {"UseRandomMac", "Zufällige MAC-Adresse verwenden"},
+    {"RandomMacInfo", "Wenn deaktiviert, wird die System-MAC-Adresse verwendet. Zufällige MAC wird empfohlen, um iOS-Verbindungsprobleme durch Gerätecaching zu vermeiden."}
+  }}
+};
+
+// Helper function to get localized text
+static const char* get_text(const char* key) {
+  const char* locale = obs_get_locale();
+  std::string locale_str(locale ? locale : "en-US");
+  
+  // Try exact locale match first
+  auto locale_it = locale_strings.find(locale_str);
+  if (locale_it == locale_strings.end()) {
+    // Try language code only (e.g., "de" from "de-DE")
+    std::string lang = locale_str.substr(0, 2);
+    for (const auto& [loc, strings] : locale_strings) {
+      if (loc.substr(0, 2) == lang) {
+        locale_it = locale_strings.find(loc);
+        break;
+      }
+    }
+  }
+  
+  // Fallback to English
+  if (locale_it == locale_strings.end()) {
+    locale_it = locale_strings.find("en-US");
+  }
+  
+  if (locale_it != locale_strings.end()) {
+    auto text_it = locale_it->second.find(key);
+    if (text_it != locale_it->second.end()) {
+      return text_it->second.c_str();
+    }
+  }
+  
+  return key; // Fallback to key if not found
+}
 
 static auto sourceName(void *v) -> const char *
 {
@@ -42,11 +99,9 @@ static auto sourceGetDefaults(obs_data_t *data) -> void
 {
   obs_data_set_default_string(data, "server_name", "OBS");
   obs_data_set_default_bool(data, "use_random_mac", true);
-  obs_data_set_default_string(data, "mac_address_label", "Configure which MAC Address is being used.");
-  obs_data_set_default_string(data, "server_name_info", 
-    "Click 'Apply Server Name' to restart the AirPlay server with the new name, or restart OBS to apply changes automatically.");
-  obs_data_set_default_string(data, "random_mac_info", 
-    "When unchecked, the system's MAC address will be used. Random MAC is recommended to have iOS update the name immediately. iOS is caching the name very aggressively, only a some rare events like a timeout (restart of OBS with opened AirPlay Screensharing dialog) update the name.");
+  obs_data_set_default_string(data, "mac_address_label", get_text("MacAddressLabelDescription"));
+  obs_data_set_default_string(data, "server_name_info", get_text("ServerNameInfo"));
+  obs_data_set_default_string(data, "random_mac_info", get_text("RandomMacInfo"));
 }
 
 static bool apply_settings_clicked(obs_properties_t *props, obs_property_t *property, void *data)
@@ -67,13 +122,13 @@ static auto sourceGetProperties(void *data) -> obs_properties_t *
   obs_properties_t *props = obs_properties_create();
   
   // Server Name section
-  obs_properties_add_text(props, "server_name", "Airplay Server Name", OBS_TEXT_DEFAULT);
-  obs_properties_add_button(props, "apply_name", "Apply Server Name", apply_settings_clicked);
+  obs_properties_add_text(props, "server_name", get_text("ServerName"), OBS_TEXT_DEFAULT);
+  obs_properties_add_button(props, "apply_name", get_text("ApplyServerName"), apply_settings_clicked);
   obs_properties_add_text(props, "server_name_info", "", OBS_TEXT_INFO);
   
   // Random MAC Address section
-  obs_properties_add_text(props, "mac_address_label", "MAC Address Settings", OBS_TEXT_INFO);
-  obs_properties_add_bool(props, "use_random_mac", "Use Random MAC Address");
+  obs_properties_add_text(props, "mac_address_label", get_text("MacAddressLabel"), OBS_TEXT_INFO);
+  obs_properties_add_bool(props, "use_random_mac", get_text("UseRandomMac"));
   obs_properties_add_text(props, "random_mac_info", "", OBS_TEXT_INFO);
   
   return props;
