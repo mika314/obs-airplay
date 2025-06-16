@@ -24,5 +24,5 @@ public:
 private:
   struct AAC_DECODER_INSTANCE *decoder = nullptr;
   AFrame obsFrame;
-  std::array<int16_t, 8096> frame;
+  std::array<int16_t, 8192> frame;
 };
