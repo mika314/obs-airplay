@@ -75,7 +75,7 @@ static std::string find_mac()
         char str[3];
         for (int i = 0; i < 6; i++)
         {
-          sprintf(str, "%02x", octet[i]);
+          snprintf(str, sizeof(str), "%02x", octet[i]);
           mac = mac + str;
           if (i < 5)
             mac = mac + ":";
