@@ -29,13 +29,14 @@ H264Decoder::H264Decoder()
 
 H264Decoder::~H264Decoder()
 {
-  avcodec_close(ctx);
-  av_free(ctx);
-  av_free(yuvPicture);
-  av_free(rgbPicture);
-  av_free(pkt);
+  avcodec_free_context(&ctx);
+  av_frame_free(&yuvPicture);
+  av_frame_free(&rgbPicture);
+  av_packet_free(&pkt);
   if (swsContext)
     sws_freeContext(swsContext);
+  if (buffer)
+    av_free(buffer);
 }
 
 auto H264Decoder::decode(std::span<const uint8_t> data) -> const VFrame *
